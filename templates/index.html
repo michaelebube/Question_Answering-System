@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q&A System - LLM Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Question & Answer System</h1>
+            <p class="subtitle">Ask me anything using AI-powered assistance</p>
+        </header>
+
+        <div class="api-key-section" id="apiKeySection">
+            <div class="info-box">
+                <p>💡 <strong>API Key:</strong> Using environment variable (GEMINI_API_KEY)</p>
+                <p>Want to use a different key? <a href="#" onclick="showApiKeyInput(); return false;">Click here</a></p>
+            </div>
+            <div class="api-input-group" id="apiInputGroup" style="display: none;">
+                <input 
+                    type="password" 
+                    id="apiKeyInput" 
+                    placeholder="Enter your Gemini API key to override"
+                    class="api-input"
+                />
+                <button onclick="saveApiKey()" class="btn btn-secondary">Save Key</button>
+            </div>
+        </div>
+
+        <main>
+            <div class="question-section">
+                <h2>Ask Your Question</h2>
+                <textarea 
+                    id="questionInput" 
+                    placeholder="Type your question here... (e.g., What is the capital of France?)"
+                    rows="4"
+                ></textarea>
+                <button onclick="askQuestion()" class="btn btn-primary" id="submitBtn">
+                    <span id="btnText">Get Answer</span>
+                    <span id="btnLoader" class="loader" style="display: none;"></span>
+                </button>
+            </div>
+
+            <div id="resultsSection" class="results-section" style="display: none;">
+                <div class="result-box">
+                    <h3>📝 Original Question</h3>
+                    <p id="originalQuestion" class="result-content"></p>
+                </div>
+
+                <div class="result-box">
+                    <h3>🔧 Preprocessed Question</h3>
+                    <p id="processedQuestion" class="result-content preprocessed"></p>
+                </div>
+
+                <div class="result-box answer-box">
+                    <h3>💡 Answer</h3>
+                    <div id="answer" class="result-content answer"></div>
+                </div>
+            </div>
+
+            <div id="errorSection" class="error-section" style="display: none;">
+                <div class="error-box">
+                    <h3>❌ Error</h3>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by Google Gemini API | Built with Flask</p>
+            <p class="footer-note">QA System - Michael Ebube &copy; 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        let apiKey = '';
+
+        function showApiKeyInput() {
+            document.getElementById('apiInputGroup').style.display = 'flex';
+        }
+
+        // Check if API key is stored
+        window.onload = function() {
+            const storedKey = localStorage.getItem('gemini_api_key');
+            if (storedKey) {
+                apiKey = storedKey;
+                document.getElementById('apiKeyInput').value = storedKey;
+            }
+        };
+
+        function saveApiKey() {
+            const keyInput = document.getElementById('apiKeyInput');
+            apiKey = keyInput.value.trim();
+            
+            if (apiKey) {
+                localStorage.setItem('gemini_api_key', apiKey);
+                alert('API key saved successfully!');
+                document.getElementById('apiInputGroup').style.display = 'none';
+            } else {
+                alert('Please enter a valid API key');
+            }
+        }
+
+        async function askQuestion() {
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Show loading state
+            setLoading(true);
+            hideResults();
+
+            try {
+                // Only send api_key if user has overridden it
+                const requestBody = { question: question };
+                if (apiKey) {
+                    requestBody.api_key = apiKey;
+                }
+
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    displayError(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                displayError('Failed to connect to the server: ' + error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('originalQuestion').textContent = data.original_question;
+            document.getElementById('processedQuestion').textContent = data.processed_question;
+            document.getElementById('answer').textContent = data.answer;
+            
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('errorSection').style.display = 'none';
+            
+            // Smooth scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }
+
+        function displayError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+
+        function hideResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorSection').style.display = 'none';
+        }
+
+        function setLoading(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+
+            if (isLoading) {
+                submitBtn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'inline-block';
+            } else {
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        }
+
+        // Allow Enter key to submit (with Shift+Enter for new line)
+        document.getElementById('questionInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
