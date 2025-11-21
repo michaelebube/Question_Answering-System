@@ -1,14 +1,9 @@
 Name: Michael Ebube
-Matric Number: [YOUR_MATRIC_NUMBER]
+Matric Number: 22CG031850
 
-Live URL: [YOUR_HOSTED_APP_URL]
-Example: https://llm-qa-system.onrender.com
+Live URL: https://question-answering-system-8hvn.onrender.com/
 
-GitHub Repository: [YOUR_GITHUB_REPO_URL]
-Example: https://github.com/yourusername/LLM_QA_Project_MichaelEbube_MATRICNO
 
----
-Instructions:
-Replace [YOUR_MATRIC_NUMBER] with your actual matriculation number
-Replace [YOUR_HOSTED_APP_URL] with your deployed application URL
-Replace [YOUR_GITHUB_REPO_URL] with your GitHub repository URL
+GitHub Repository: https://github.com/michaelebube/Question_Answering-System
+
+
