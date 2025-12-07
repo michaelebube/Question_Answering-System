@@ -16,7 +16,13 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure the LLM client
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+
+# Debug: Log API key status at startup
+if GEMINI_API_KEY:
+    print(f"✓ API Key loaded successfully (length: {len(GEMINI_API_KEY)})")
+else:
+    print("✗ WARNING: GEMINI_API_KEY not found in environment")
 
 
 class QuestionProcessor:
@@ -68,8 +74,14 @@ def get_llm_answer(question: str, api_key: str) -> dict:
                 "error": "API key not configured. Please set GEMINI_API_KEY environment variable.",
             }
 
+        if not api_key.strip():
+            return {
+                "success": False,
+                "error": "API key is empty or contains only whitespace.",
+            }
+
         # Configure Gemini
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=api_key.strip())
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         # Construct prompt
