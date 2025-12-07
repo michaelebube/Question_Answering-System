@@ -15,17 +15,7 @@
 
         <div class="api-key-section" id="apiKeySection">
             <div class="info-box">
-                <p>💡 <strong>API Key:</strong> Using environment variable (GEMINI_API_KEY)</p>
-                <p>Want to use a different key? <a href="#" onclick="showApiKeyInput(); return false;">Click here</a></p>
-            </div>
-            <div class="api-input-group" id="apiInputGroup" style="display: none;">
-                <input 
-                    type="password" 
-                    id="apiKeyInput" 
-                    placeholder="Enter your Gemini API key to override"
-                    class="api-input"
-                />
-                <button onclick="saveApiKey()" class="btn btn-secondary">Save Key</button>
+                <p>🔒 <strong>API Key:</strong> Securely stored on server (GEMINI_API_KEY environment variable)</p>
             </div>
         </div>
 
@@ -75,34 +65,6 @@
     </div>
 
     <script>
-        let apiKey = '';
-
-        function showApiKeyInput() {
-            document.getElementById('apiInputGroup').style.display = 'flex';
-        }
-
-        // Check if API key is stored
-        window.onload = function() {
-            const storedKey = localStorage.getItem('gemini_api_key');
-            if (storedKey) {
-                apiKey = storedKey;
-                document.getElementById('apiKeyInput').value = storedKey;
-            }
-        };
-
-        function saveApiKey() {
-            const keyInput = document.getElementById('apiKeyInput');
-            apiKey = keyInput.value.trim();
-            
-            if (apiKey) {
-                localStorage.setItem('gemini_api_key', apiKey);
-                alert('API key saved successfully!');
-                document.getElementById('apiInputGroup').style.display = 'none';
-            } else {
-                alert('Please enter a valid API key');
-            }
-        }
-
         async function askQuestion() {
             const questionInput = document.getElementById('questionInput');
             const question = questionInput.value.trim();
@@ -117,18 +79,12 @@
             hideResults();
 
             try {
-                // Only send api_key if user has overridden it
-                const requestBody = { question: question };
-                if (apiKey) {
-                    requestBody.api_key = apiKey;
-                }
-
                 const response = await fetch('/ask', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({ question: question })
                 });
 
                 const data = await response.json();
