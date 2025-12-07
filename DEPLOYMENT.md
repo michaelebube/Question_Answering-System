@@ -75,8 +75,8 @@ This guide provides step-by-step instructions for deploying your Q&A system to v
 
    - Click "Environment" tab
    - Add variable:
-     - Key: `GROQ_API_KEY`
-     - Value: `your_actual_groq_api_key`
+     - Key: `GEMINI_API_KEY`
+     - Value: `your_actual_gemini_api_key`
 
 5. **Deploy:**
    - Click "Create Web Service"

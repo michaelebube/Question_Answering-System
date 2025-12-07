@@ -32,9 +32,8 @@ Then open: **http://localhost:5000**
 
 Your `.env` file contains:
 
-```
-GEMINI_API_KEY=AIzaSyDpwTR57iwK1I7rUJo4oBRNdN-wRD-LcIc
-```
+
+
 
 The application will automatically load this key.
 
